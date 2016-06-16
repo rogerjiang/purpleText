@@ -23,6 +23,7 @@ typedef NS_ENUM(NSUInteger, PurpleElementType) {
     PurpleElementTypeTableHeaderCell,
     PurpleElementTypeTableRow,
     PurpleElementTypeTableRowCell,
+    PurpleELementTypeContent,
 };
 
 typedef NS_ENUM(NSUInteger, PurpleSubElementType) {

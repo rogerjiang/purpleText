@@ -31,4 +31,14 @@
     [self didChangeValueForKey:@"elements"];
 }
 
+- (void)insertElement:(purpleElement *)anElement index:(NSUInteger)index
+{
+    [_elements insertObject:anElement atIndex:index];
+}
+
+- (NSUInteger)elementCount
+{
+    return _elements.count;
+}
+
 @end

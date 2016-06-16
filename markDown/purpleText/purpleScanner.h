@@ -23,6 +23,7 @@
 - (BOOL)atEndOfLine;
 - (BOOL)atEndOfString;
 - (void)advance;
+- (NSUInteger)currentLocation;
 
 - (void)beginTransaction;
 - (void)commitTransaction:(BOOL)shouldSave;

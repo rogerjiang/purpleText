@@ -211,6 +211,44 @@
             _currentHeight -= (80+CTFrameLeading);
             
         }
+        else if(element.type == PurpleELementTypeContent)
+        {
+            //这里是正文。。
+            NSString *contentElement = [NSString stringWithFormat:@"%@\n", [_purpleDocument.markDown substringWithRange:element.innerRange]];
+            
+            NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:contentElement];
+            
+            NSInteger fontSize = 14;
+            
+            NSDictionary *attributeDic = [NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:fontSize], NSFontAttributeName, [UIColor colorWithRed:46/255.0 green:46/255.0 blue:47/255.0 alpha:1.000] ,NSForegroundColorAttributeName, nil];
+            
+            [attributedString addAttributes:attributeDic range:NSMakeRange(0, [attributedString length])];
+            
+            CTFramesetterRef ctFramesetter = CTFramesetterCreateWithAttributedString((CFMutableAttributedStringRef)attributedString);
+            
+            CGSize constraints = CGSizeMake(rect.size.width, CGFLOAT_MAX);
+            CFDictionaryRef attributeRef = (__bridge CFDictionaryRef)attributeDic;
+            CGSize contentSize = CTFramesetterSuggestFrameSizeWithConstraints(ctFramesetter,
+                                                                              CFRangeMake(0, attributedString.length),
+                                                                              attributeRef,
+                                                                              constraints,
+                                                                              nil);
+            
+            
+            CGMutablePathRef path = CGPathCreateMutable();
+            _currentCTFrameBounds = CGRectMake(0.0, _currentHeight-contentSize.height, rect.size.width, contentSize.height);
+            CGPathAddRect(path, NULL, _currentCTFrameBounds);
+            
+            CTFrameRef ctFrame = CTFramesetterCreateFrame(ctFramesetter,CFRangeMake(0, 0), path, NULL);
+            CTFrameDraw(ctFrame, context);
+            
+            CFRelease(ctFrame);
+            CFRelease(path);
+            CFRelease(ctFramesetter);
+            
+            _currentHeight -= (contentSize.height+CTFrameLeading);
+            
+        }
         
     }
     

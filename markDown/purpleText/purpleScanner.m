@@ -115,6 +115,11 @@
     return self.currentRange.location;
 }
 
+- (NSUInteger)currentLocation
+{
+    return self.currentRange.location;
+}
+
 - (NSRange)currentLineRange
 {
     return [self.lineRanges[self.rangeIndex] rangeValue];

@@ -16,5 +16,7 @@
 
 -(instancetype)initWithMarkDown:(NSString*)text;
 - (void)addElement:(purpleElement *)anElement;
+- (void)insertElement:(purpleElement *)anElement index:(NSUInteger)index;
+- (NSUInteger)elementCount;
 
 @end

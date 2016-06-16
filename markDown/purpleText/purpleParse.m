@@ -13,7 +13,8 @@
 {
     purpleScanner *_scanner;
     purpleDocument  *_document;
-    BOOL _resolveText;
+    NSRange _contentRange;
+    NSUInteger _contentStartLoc;
     BOOL _contentBefore;
     purpleElement *contentElement;
 }
@@ -30,7 +31,7 @@
 
 - (void)parseElements:(purpleScanner *)scanner
 {
-    _resolveText = NO;
+    _contentStartLoc = -1;
     while (!scanner.atEndOfString)
     {
         //title
@@ -41,7 +42,7 @@
         if(headElement) {
             [scanner commitTransaction:YES];
             [_document addElement:headElement];
-            _resolveText = YES;
+            [self parseContentWithScanner:scanner shoudLoad:YES];
             continue;
         }
         else {
@@ -55,6 +56,7 @@
         if(quoteElement) {
             [scanner commitTransaction:YES];
             [_document addElement:quoteElement];
+            [self parseContentWithScanner:scanner shoudLoad:YES];
             continue;
         }
         else {
@@ -68,6 +70,7 @@
         if(linkElement) {
             [scanner commitTransaction:YES];
             [_document addElement:linkElement];
+            [self parseContentWithScanner:scanner shoudLoad:YES];
             continue;
         }
         else {
@@ -81,6 +84,7 @@
         if(imageElement) {
             [scanner commitTransaction:YES];
             [_document addElement:imageElement];
+            [self parseContentWithScanner:scanner shoudLoad:YES];
             continue;
         }
         else {
@@ -94,6 +98,7 @@
         if(listElement) {
             [scanner commitTransaction:YES];
             [_document addElement:listElement];
+            [self parseContentWithScanner:scanner shoudLoad:YES];
             continue;
         }
         else {
@@ -101,25 +106,10 @@
         }
         
         //content
-        
-        if(_contentBefore)
-        {
-            [self addContentText:scanner];
-        }
-        else
-        {
-            [self addContentText:scanner];
-        }
-        contentElement = [self parsePrefixContentWithScanner:scanner];
-        if(contentElement) {
-            [scanner commitTransaction:YES];
-            [_document addElement:contentElement];
-        }
-        else {
-            [scanner commitTransaction:NO];
-        }
-        
+        [self parseContentWithScanner:scanner shoudLoad:NO];
     }
+    
+    [self parseContentWithScanner:scanner shoudLoad:YES];
     
     return;
 }
@@ -359,44 +349,52 @@
     
 }
 
-- (purpleElement *)parsePrefixContentWithScanner:(purpleScanner *)scanner
+- (purpleElement *)parseContentWithScanner:(purpleScanner *)scanner shoudLoad:(BOOL)load
 {
-    NSUInteger level = 0;
-    while (scanner.nextCharacter == '#' && level < 6)
+    if(load == NO)
     {
-        level++;
-        [scanner advance];
-    }
-    
-    if (level == 0)
-        return nil;
-    
-    [scanner skipCharactersFromSet:NSCharacterSet.whitespaceCharacterSet];
-    
-    NSRange headerRange = scanner.currentRange;
-    
-    // Remove trailing whitespace
-    NSCharacterSet *whitespaceSet = NSCharacterSet.whitespaceCharacterSet;
-    while (headerRange.length > 0)
-    {
-        unichar character = [scanner.markDownText characterAtIndex:NSMaxRange(headerRange)-1];
-        if ([whitespaceSet characterIsMember:character])
-            headerRange.length--;
+        if(_contentStartLoc == -1) {
+            _contentStartLoc = scanner.currentLocation;
+            _contentRange = NSMakeRange(_contentStartLoc, 1);
+        }
+        else {
+            _contentRange = NSMakeRange(_contentStartLoc, _contentRange.length+1);
+        }
+        
+        if(scanner.atEndOfLine) {
+            [scanner advanceToNextLine];
+        }
         else
-            break;
+        {
+            [scanner advance];
+        }
+        return nil;
     }
-    
-    [scanner advanceToNextLine];
-    
-    purpleElement *element = [purpleElement new];
-    element.type  = PurpleElementTypeHeader;
-    element.range = NSMakeRange(scanner.startLocation, NSMaxRange(scanner.currentRange)-scanner.startLocation);
-    element.level = level;
-    element.innerRange = NSMakeRange(headerRange.location, headerRange.length);
-    //    [element.innerRanges addObject:];
-    
-    
-    return element;
+    else
+    {
+        
+        if(_contentStartLoc == -1) return nil;
+        
+        purpleElement *element = [purpleElement new];
+        element.type  = PurpleELementTypeContent;
+        element.range = _contentRange;
+        element.innerRange = _contentRange;
+        
+        //this has an order problem
+        NSUInteger count = [_document elementCount];
+        
+        if(count >= 1) {
+            [_document insertElement:element index:count-1];
+        }
+        else
+        {
+            [_document addElement:element];
+        }
+
+        _contentStartLoc = -1;
+        _contentRange = NSMakeRange(0, 0);
+        return element;
+    }
 }
 
 
