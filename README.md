@@ -14,10 +14,11 @@ It's so huge that I split it into several independent components:
 
 Demo Project
 ==============
-See `Demo/YYKitDemo.xcodeproj`
+See `Demo/purpleText.xcodeproj`
 
-<img src="https://raw.github.com/ibireme/YYKit/master/Demo/Snapshots/twitter.png" width="320"><br/>
-<img src="https://raw.github.com/ibireme/YYKit/master/Demo/Snapshots/weibo.png" width="320"> <img src="https://raw.github.com/ibireme/YYKit/master/Demo/Snapshots/weibo_compose.png" width="320">
+<img src="" width="320"><br/>
+<img src="" width="320"> 
+<img src="" width="320">
 
 
 Installation
